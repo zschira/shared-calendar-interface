@@ -1,0 +1,9 @@
+.root {
+  padding-left: 10px;
+  flex-grow: 1;
+  max-width: 400px;
+}
+
+.buttons {
+  padding-top: 20px;
+}
