@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Calendar from './App';
+import BaseApplication from './App';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Calendar />
+    <BaseApplication />
   </React.StrictMode>,
   document.getElementById('root')
 );

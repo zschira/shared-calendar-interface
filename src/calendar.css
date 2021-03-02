@@ -25,21 +25,22 @@ b { /* used for event dates/times */
   margin-right: 3px;
 }
 
-/*
-.demo-app {
+
+.calendar {
   display: flex;
   min-height: 100%;
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   font-size: 16px;
 }
-*/
 
-.demo-app-main {
+
+.calendar-main {
   flex-grow: 1;
   padding: 3em;
 }
 
 .fc { /* the calendar root */
   max-width: 1400px;
+  height: 100%;
   margin: 0 auto;
 }

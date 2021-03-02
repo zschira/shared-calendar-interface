@@ -1,112 +1,163 @@
-import React from 'react'
-import FullCalendar from '@fullcalendar/react'
-import { DateSelectArg, EventClickArg, EventContentArg } from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import rrulePlugin from '@fullcalendar/rrule'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
-import EventMenu, { EventMenuInfo } from './event-menu'
-import EventClick, { EventClickInfo } from './event-click'
-import './App.css'
+import React from 'react';
+import clsx from 'clsx';
+import { makeStyles, useTheme, Theme, createStyles } from '@material-ui/core/styles';
+import Drawer from '@material-ui/core/Drawer';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import List from '@material-ui/core/List';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import TodayIcon from '@material-ui/icons/Today';
+import PeopleIcon from '@material-ui/icons/People';
+import Calendar from './calendar';
 
-interface CalendarState {
-  eventMenuInfo: EventMenuInfo,
-  eventClickInfo: EventClickInfo,
-}
+const drawerWidth = 240;
 
-export default class Calendar extends React.Component<{}, CalendarState> {
-  state: CalendarState = {
-    eventMenuInfo: {
-      openMenu: false,
-      selectInfo: null,
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      display: 'flex',
     },
-    eventClickInfo: {
-        openMenu: false,
-        clickInfo: null
-    }
+    appBar: {
+      transition: theme.transitions.create(['margin', 'width'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+    },
+    appBarShift: {
+      width: `calc(100% - ${drawerWidth}px)`,
+      marginLeft: drawerWidth,
+      transition: theme.transitions.create(['margin', 'width'], {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+    },
+    menuButton: {
+      marginRight: theme.spacing(2),
+    },
+    hide: {
+      display: 'none',
+    },
+    drawer: {
+      width: drawerWidth,
+      flexShrink: 0,
+    },
+    drawerPaper: {
+      width: drawerWidth,
+    },
+    drawerHeader: {
+      display: 'flex',
+      alignItems: 'center',
+      padding: theme.spacing(0, 1),
+      // necessary for content to be below app bar
+      ...theme.mixins.toolbar,
+      justifyContent: 'flex-end',
+    },
+    content: {
+      flexGrow: 1,
+      padding: theme.spacing(3),
+      transition: theme.transitions.create('margin', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+      marginLeft: -drawerWidth,
+    },
+    contentShift: {
+      transition: theme.transitions.create('margin', {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+      marginLeft: 0,
+    },
+  }),
+);
+
+export default function BaseApplication() {
+  const classes = useStyles();
+  const theme = useTheme();
+  const [open, setOpen] = React.useState(false);
+  const [view, setView] = React.useState("calendar");
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
+  const handleViewSelect = (name: string) => {
+    setView(name);
+    setOpen(false);
   }
 
-  render() {
-    return (
-      <div className='demo-app'>
-        <div className='demo-app-main'>
-          <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            }}
-            initialView='dayGridMonth'
-            editable={true}
-            selectable={true}
-            selectMirror={true}
-            dayMaxEvents={true}
-            //initialEvents={INITIAL_EVENTS} // alternatively, use the `events` setting to fetch from a feed
-            select={this.handleDateSelect}
-            eventContent={renderEventContent} // custom render function
-            eventClick={this.handleEventClick}
-            //eventsSet={this.handleEvents} // called after events are initialized/added/changed/removed
-            eventAdd={this.handleEventAdd}
-            unselectAuto={false}
-            /* you can update a remote database when these fire:
-            eventChange={function(){}}
-            eventRemove={function(){}}
-            */
-          />
-          <EventMenu
-            info={this.state.eventMenuInfo}
-            onClickAway={this.closeEventMenu}
-          />
-          <EventClick
-            eventClick={this.state.eventClickInfo}
-                  onClickAway={() => {this.setState({ eventClickInfo: { clickInfo: null, openMenu: false }})}}
-          />
-        </div>
-      </div>
-    )
-  }
-
-  closeEventMenu = () => {
-    if(this.state.eventMenuInfo.openMenu) {
-      this.setState({
-        eventMenuInfo: {
-          openMenu: false,
-          selectInfo: null
-        }
-      })
-    }
-  }
-
-  handleEventAdd = () => {
-    this.closeEventMenu();
-  }
-
-  handleDateSelect = (selectInfo: DateSelectArg) => {
-    this.setState({
-      eventMenuInfo: {
-        openMenu: true,
-        selectInfo: selectInfo
-      }
-    })
-  }
-
-  handleEventClick = (clickInfo: EventClickArg) => {
-    this.setState({
-      eventClickInfo: {
-        openMenu: true,
-        clickInfo: clickInfo
-      }
-    })
-  }
-}
-
-
-function renderEventContent(eventInfo: EventContentArg) {
   return (
-    <>
-      <b>{eventInfo.timeText}</b>
-      <i>{eventInfo.event.title}</i>
-    </>
-  )
+    <div className={classes.root}>
+      <CssBaseline />
+      <AppBar
+        position="fixed"
+        className={clsx(classes.appBar, {
+          [classes.appBarShift]: open,
+        })}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={handleDrawerOpen}
+            edge="start"
+            className={clsx(classes.menuButton, open && classes.hide)}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap>
+            Mutual Aid Hub
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        className={classes.drawer}
+        variant="persistent"
+        anchor="left"
+        open={open}
+        classes={{
+          paper: classes.drawerPaper,
+        }}
+      >
+        <div className={classes.drawerHeader}>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </div>
+        <Divider />
+        <List>
+          <ListItem button onClick={() => { handleViewSelect("calendar") }}>
+            <ListItemIcon> <TodayIcon /> </ListItemIcon>
+            <ListItemText primary="Calendar" />
+          </ListItem>
+          <ListItem button onClick={() => { handleViewSelect("resourceManagement") }}>
+            <ListItemIcon> <PeopleIcon /> </ListItemIcon>
+            <ListItemText primary="Resource Management" />
+          </ListItem>
+        </List>
+      </Drawer>
+      <main
+        className={clsx(classes.content, {
+          [classes.contentShift]: open,
+        })}
+      >
+      {view === "calendar" &&
+        <Calendar />
+      }
+      </main>
+    </div>
+  );
 }
