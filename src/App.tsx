@@ -9,6 +9,7 @@ import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -85,6 +86,9 @@ export default function BaseApplication() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState("calendar");
+  const [prev, setPrev] = React.useState(false);
+  const [next, setNext] = React.useState(false);
+  const [today, setToday] = React.useState(false);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -97,6 +101,16 @@ export default function BaseApplication() {
   const handleViewSelect = (name: string) => {
     setView(name);
     setOpen(false);
+  }
+
+  const handleUnsetButtonFlag = (button: string) => {
+    if(button === "next") {
+      setNext(false);
+    } else if(button === "prev") {
+      setPrev(false);
+    } else if(button === "today") {
+      setToday(false);
+    }
   }
 
   return (
@@ -121,6 +135,15 @@ export default function BaseApplication() {
           <Typography variant="h6" noWrap>
             Mutual Aid Hub
           </Typography>
+          <IconButton color="inherit" onClick={() => { setPrev(true); }}>
+            <ChevronLeftIcon />
+          </IconButton>
+          <IconButton color="inherit" onClick={() => { setNext(true); }}>
+            <ChevronRightIcon />
+          </IconButton>
+          <Button color="inherit" onClick={() => { setToday(true); }}> 
+            Today 
+          </Button>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -155,7 +178,12 @@ export default function BaseApplication() {
         })}
       >
       {view === "calendar" &&
-        <Calendar />
+        <Calendar 
+          unsetButtonFlag={handleUnsetButtonFlag}
+          prevCalled={prev}
+          nextCalled={next}
+          todayCalled={today}
+        />
       }
       </main>
     </div>

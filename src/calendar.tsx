@@ -14,29 +14,51 @@ interface CalendarState {
   eventClickInfo: EventClickInfo,
 }
 
-export default class Calendar extends React.Component<{}, CalendarState> {
-  state: CalendarState = {
-    eventMenuInfo: {
-      openMenu: false,
-      selectInfo: null,
-    },
-    eventClickInfo: {
+interface CalendarProps {
+  prevCalled: boolean,
+  nextCalled: boolean,
+  todayCalled: boolean,
+  unsetButtonFlag: (arg0: string) => void,
+}
+
+export default class Calendar extends React.Component<CalendarProps, CalendarState> {
+  calendarRef = React.createRef<FullCalendar>();
+  constructor(props: CalendarProps) {
+    super(props);
+
+    this.state = {
+      eventMenuInfo: {
         openMenu: false,
-        clickInfo: null
+        selectInfo: null,
+      },
+      eventClickInfo: {
+          openMenu: false,
+          clickInfo: null
+      }
     }
+
+    this.handleButtons = this.handleButtons.bind(this);
   }
 
   render() {
+    if(this.props.prevCalled) {
+      this.handleButtons("prev");
+      this.props.unsetButtonFlag("prev");
+    } else if(this.props.nextCalled) {
+      this.handleButtons("next");
+      this.props.unsetButtonFlag("next");
+    } else if(this.props.todayCalled) {
+      this.handleButtons("today");
+      this.props.unsetButtonFlag("today");
+    }
+
     return (
       <div className='calendar'>
         <div className='calendar-main'>
           <FullCalendar
+            ref={this.calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            }}
+            headerToolbar={false}
             initialView='dayGridMonth'
             editable={true}
             selectable={true}
@@ -60,7 +82,7 @@ export default class Calendar extends React.Component<{}, CalendarState> {
           />
           <EventClick
             eventClick={this.state.eventClickInfo}
-                  onClickAway={() => {this.setState({ eventClickInfo: { clickInfo: null, openMenu: false }})}}
+            onClickAway={() => {this.setState({ eventClickInfo: { clickInfo: null, openMenu: false }})}}
           />
         </div>
       </div>
@@ -98,6 +120,20 @@ export default class Calendar extends React.Component<{}, CalendarState> {
         clickInfo: clickInfo
       }
     })
+  }
+
+  handleButtons(button: string) {
+    let calendarRef = this.calendarRef;
+    let calendarApi = calendarRef?.current?.getApi();
+    if(calendarApi === undefined) { return; }
+
+    if(button === "next") {
+      calendarApi.next();
+    } else if(button === "prev") {
+      calendarApi.prev();
+    } else if(button === "today") {
+      calendarApi.today();
+    }
   }
 }
 
