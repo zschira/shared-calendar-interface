@@ -1,6 +1,6 @@
 import React from 'react'
 import FullCalendar from '@fullcalendar/react'
-import { DateSelectArg, EventClickArg, EventContentArg } from '@fullcalendar/react'
+import { DateSelectArg, EventClickArg, EventContentArg, formatDate } from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import rrulePlugin from '@fullcalendar/rrule'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -15,14 +15,18 @@ interface CalendarState {
 }
 
 interface CalendarProps {
-  prevCalled: boolean,
-  nextCalled: boolean,
-  todayCalled: boolean,
-  unsetButtonFlag: (arg0: string) => void,
+  prevCalled: number,
+  nextCalled: number,
+  todayCalled: number,
+  setTitle: (arg0: string) => void,
+  calendarView: string,
+  drawerOpen: boolean,
 }
 
 export default class Calendar extends React.Component<CalendarProps, CalendarState> {
   calendarRef = React.createRef<FullCalendar>();
+  viewMap = new Map([["month", "dayGridMonth"], ["week", "timeGridWeek"], ["day", "timeGridDay"]]);
+
   constructor(props: CalendarProps) {
     super(props);
 
@@ -34,23 +38,11 @@ export default class Calendar extends React.Component<CalendarProps, CalendarSta
       eventClickInfo: {
           openMenu: false,
           clickInfo: null
-      }
+      },
     }
-
-    this.handleButtons = this.handleButtons.bind(this);
   }
 
   render() {
-    if(this.props.prevCalled) {
-      this.handleButtons("prev");
-      this.props.unsetButtonFlag("prev");
-    } else if(this.props.nextCalled) {
-      this.handleButtons("next");
-      this.props.unsetButtonFlag("next");
-    } else if(this.props.todayCalled) {
-      this.handleButtons("today");
-      this.props.unsetButtonFlag("today");
-    }
 
     return (
       <div className='calendar'>
@@ -64,6 +56,7 @@ export default class Calendar extends React.Component<CalendarProps, CalendarSta
             selectable={true}
             selectMirror={true}
             dayMaxEvents={true}
+            longPressDelay={20}
             //initialEvents={INITIAL_EVENTS} // alternatively, use the `events` setting to fetch from a feed
             select={this.handleDateSelect}
             eventContent={renderEventContent} // custom render function
@@ -71,6 +64,7 @@ export default class Calendar extends React.Component<CalendarProps, CalendarSta
             //eventsSet={this.handleEvents} // called after events are initialized/added/changed/removed
             eventAdd={this.handleEventAdd}
             unselectAuto={false}
+            contentHeight={900}
             /* you can update a remote database when these fire:
             eventChange={function(){}}
             eventRemove={function(){}}
@@ -122,17 +116,31 @@ export default class Calendar extends React.Component<CalendarProps, CalendarSta
     })
   }
 
-  handleButtons(button: string) {
+  componentDidMount() {
     let calendarRef = this.calendarRef;
     let calendarApi = calendarRef?.current?.getApi();
     if(calendarApi === undefined) { return; }
 
-    if(button === "next") {
+    this.props.setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
+  }
+
+  componentDidUpdate(prevProps: CalendarProps) {
+    let calendarRef = this.calendarRef;
+    let calendarApi = calendarRef?.current?.getApi();
+    if(calendarApi === undefined) { return; }
+
+    if(this.props.nextCalled !== prevProps.nextCalled) {
       calendarApi.next();
-    } else if(button === "prev") {
+      this.props.setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
+    } else if(this.props.prevCalled !== prevProps.prevCalled) {
       calendarApi.prev();
-    } else if(button === "today") {
+      this.props.setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
+    } else if(this.props.todayCalled !== prevProps.todayCalled) {
       calendarApi.today();
+      this.props.setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
+    } else if(this.props.calendarView !== prevProps.calendarView) {
+      let value = this.viewMap.get(this.props.calendarView) ?? '';
+      calendarApi.changeView(value);
     }
   }
 }

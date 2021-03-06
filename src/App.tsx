@@ -18,6 +18,8 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import TodayIcon from '@material-ui/icons/Today';
 import PeopleIcon from '@material-ui/icons/People';
+import Select from '@material-ui/core/Select';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import Calendar from './calendar';
 
 const drawerWidth = 240;
@@ -26,6 +28,9 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       display: 'flex',
+      height: 100,
+    },
+    main: {
     },
     appBar: {
       transition: theme.transitions.create(['margin', 'width'], {
@@ -43,6 +48,19 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     menuButton: {
       marginRight: theme.spacing(2),
+    },
+    title: {
+      flexGrow: 1,
+    },
+    selectBox: {
+      backgroundColor: "white",
+      marginRight: theme.spacing(3),
+    },
+    appBarContent: {
+      display: 'flex',
+      flexDirection: 'row',
+      flexGrow: 1,
+      paddingLeft: theme.spacing(2),
     },
     hide: {
       display: 'none',
@@ -67,14 +85,14 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(3),
       transition: theme.transitions.create('margin', {
         easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
+        duration: 0,
       }),
       marginLeft: -drawerWidth,
     },
     contentShift: {
       transition: theme.transitions.create('margin', {
         easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
+        duration: 0,
       }),
       marginLeft: 0,
     },
@@ -86,9 +104,11 @@ export default function BaseApplication() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState("calendar");
-  const [prev, setPrev] = React.useState(false);
-  const [next, setNext] = React.useState(false);
-  const [today, setToday] = React.useState(false);
+  const [prev, setPrev] = React.useState(0);
+  const [next, setNext] = React.useState(0);
+  const [today, setToday] = React.useState(0);
+  const [title, setTitle] = React.useState("");
+  const [calendarView, setCalendarView] = React.useState("month");
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -103,13 +123,54 @@ export default function BaseApplication() {
     setOpen(false);
   }
 
-  const handleUnsetButtonFlag = (button: string) => {
-    if(button === "next") {
-      setNext(false);
-    } else if(button === "prev") {
-      setPrev(false);
-    } else if(button === "today") {
-      setToday(false);
+  const handleGetTitle = (title: string) => {
+    setTitle(title);
+  }
+
+  const handleCalendarViewSelect = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setCalendarView(event.target.value as string);
+  }
+
+  const getAppBarContent = () => {
+    if(view === "calendar") {
+      return(
+        <>
+          <Typography variant="h6">
+            Mutual Aid Hub
+          </Typography>
+          <div className={classes.appBarContent}>
+            <IconButton color="inherit" edge="end" onClick={() => { setPrev(prev+1); }}>
+              <ChevronLeftIcon />
+            </IconButton>
+            <IconButton color="inherit" edge="end" onClick={() => { setNext(next+1); }}>
+              <ChevronRightIcon />
+            </IconButton>
+            <Button color="inherit" onClick={() => { setToday(today+1); }}> 
+              Today 
+            </Button>
+          </div>
+          <Typography variant="h6" className={classes.title}>
+            {title}
+          </Typography>
+          <div>
+            <Select
+              value={calendarView}
+              onChange={handleCalendarViewSelect}
+              className={classes.selectBox}
+              native
+              variant="outlined"
+            >
+              <option value={"month"}>Month</option>
+              <option value={"week"}>Week</option>
+              <option value={"day"}>Day</option>
+            </Select>
+            <IconButton color="inherit" edge="end" >
+              <AccountCircleIcon fontSize="large"/>
+            </IconButton>
+          </div>
+        </>
+      );
+    } else if(view === "resourceManagement") {
     }
   }
 
@@ -132,18 +193,7 @@ export default function BaseApplication() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap>
-            Mutual Aid Hub
-          </Typography>
-          <IconButton color="inherit" onClick={() => { setPrev(true); }}>
-            <ChevronLeftIcon />
-          </IconButton>
-          <IconButton color="inherit" onClick={() => { setNext(true); }}>
-            <ChevronRightIcon />
-          </IconButton>
-          <Button color="inherit" onClick={() => { setToday(true); }}> 
-            Today 
-          </Button>
+          {getAppBarContent()}
         </Toolbar>
       </AppBar>
       <Drawer
@@ -179,12 +229,15 @@ export default function BaseApplication() {
       >
       {view === "calendar" &&
         <Calendar 
-          unsetButtonFlag={handleUnsetButtonFlag}
           prevCalled={prev}
           nextCalled={next}
           todayCalled={today}
+          setTitle={handleGetTitle}
+          calendarView={calendarView}
+          drawerOpen={open}
         />
       }
+      {view === "resourceManagement" && <div />}
       </main>
     </div>
   );
