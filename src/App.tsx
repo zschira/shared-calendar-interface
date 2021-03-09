@@ -123,10 +123,6 @@ export default function BaseApplication() {
     setOpen(false);
   }
 
-  const handleGetTitle = (title: string) => {
-    setTitle(title);
-  }
-
   const handleCalendarViewSelect = (event: React.ChangeEvent<{ value: unknown }>) => {
     setCalendarView(event.target.value as string);
   }
@@ -232,7 +228,7 @@ export default function BaseApplication() {
           prevCalled={prev}
           nextCalled={next}
           todayCalled={today}
-          setTitle={handleGetTitle}
+          setTitle={setTitle}
           calendarView={calendarView}
           drawerOpen={open}
         />

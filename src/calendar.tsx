@@ -1,4 +1,5 @@
 import React from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react'
 import { DateSelectArg, EventClickArg, EventContentArg, formatDate } from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -9,11 +10,6 @@ import EventMenu, { EventMenuInfo } from './event-menu'
 import EventClick, { EventClickInfo } from './event-click'
 import './calendar.css'
 
-interface CalendarState {
-  eventMenuInfo: EventMenuInfo,
-  eventClickInfo: EventClickInfo,
-}
-
 interface CalendarProps {
   prevCalled: number,
   nextCalled: number,
@@ -23,126 +19,139 @@ interface CalendarProps {
   drawerOpen: boolean,
 }
 
-export default class Calendar extends React.Component<CalendarProps, CalendarState> {
-  calendarRef = React.createRef<FullCalendar>();
-  viewMap = new Map([["month", "dayGridMonth"], ["week", "timeGridWeek"], ["day", "timeGridDay"]]);
+export default function Calendar(props: CalendarProps) {
+  const setTitle = props.setTitle;
+  const calendarView = props.calendarView;
+  const nextCalled = props.nextCalled;
+  const prevCalled = props.prevCalled;
+  const todayCalled = props.todayCalled;
 
-  constructor(props: CalendarProps) {
-    super(props);
+  const calendarRef = useRef<FullCalendar>();
 
-    this.state = {
-      eventMenuInfo: {
+  const [eventMenuInfo, setEventMenuInfo] = useState<EventMenuInfo>({
+    openMenu: false,
+    selectInfo: null
+  });
+
+  const [eventClickInfo, setEventClickInfo] = useState<EventClickInfo>({
+    openMenu: false,
+    clickInfo: null
+  });
+
+  const closeEventMenu = () => {
+    if(eventMenuInfo.openMenu) {
+      setEventMenuInfo({
         openMenu: false,
-        selectInfo: null,
-      },
-      eventClickInfo: {
-          openMenu: false,
-          clickInfo: null
-      },
+        selectInfo: null
+      });
     }
   }
 
-  render() {
+  const handleEventAdd = () => {
+    closeEventMenu();
+  }
 
-    return (
-      <div className='calendar'>
-        <div className='calendar-main'>
-          <FullCalendar
-            ref={this.calendarRef}
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
-            headerToolbar={false}
-            initialView='dayGridMonth'
-            editable={true}
-            selectable={true}
-            selectMirror={true}
-            dayMaxEvents={true}
-            longPressDelay={20}
-            //initialEvents={INITIAL_EVENTS} // alternatively, use the `events` setting to fetch from a feed
-            select={this.handleDateSelect}
-            eventContent={renderEventContent} // custom render function
-            eventClick={this.handleEventClick}
-            //eventsSet={this.handleEvents} // called after events are initialized/added/changed/removed
-            eventAdd={this.handleEventAdd}
-            unselectAuto={false}
-            contentHeight={900}
-            /* you can update a remote database when these fire:
-            eventChange={function(){}}
-            eventRemove={function(){}}
-            */
-          />
-          <EventMenu
-            info={this.state.eventMenuInfo}
-            onClickAway={this.closeEventMenu}
-          />
-          <EventClick
-            eventClick={this.state.eventClickInfo}
-            onClickAway={() => {this.setState({ eventClickInfo: { clickInfo: null, openMenu: false }})}}
-          />
-        </div>
+  const handleDateSelect = (selectInfo: DateSelectArg) => {
+    setEventMenuInfo({
+      openMenu: true,
+      selectInfo: selectInfo
+    });
+  }
+
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    setEventClickInfo({
+      openMenu: true,
+      clickInfo: clickInfo
+    });
+  }
+
+  const getCalendarApi = useCallback(() => {
+    let calendarRefTmp = calendarRef;
+    return calendarRefTmp?.current?.getApi();
+  }, [calendarRef]);
+
+  useEffect(() => {
+    let calendarApi = getCalendarApi();
+    if(calendarApi === undefined) { return; }
+
+    calendarApi.next();
+    setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
+  }, [nextCalled, getCalendarApi, setTitle]);
+
+  useEffect(() => {
+    let calendarApi = getCalendarApi();
+    if(calendarApi === undefined) { return; }
+
+    calendarApi.prev();
+    setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
+  }, [prevCalled, getCalendarApi, setTitle]);
+
+  useEffect(() => {
+    let calendarApi = getCalendarApi();
+    if(calendarApi === undefined) { return; }
+
+    calendarApi.today();
+    setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
+  }, [todayCalled, getCalendarApi, setTitle]);
+
+  useEffect(() => {
+    let calendarApi = getCalendarApi();
+    if(calendarApi === undefined) { return; }
+
+    const viewMap = new Map([
+      ["month", "dayGridMonth"], 
+      ["week", "timeGridWeek"], 
+      ["day", "timeGridDay"]
+    ]);
+
+    let value = viewMap.get(calendarView) ?? '';
+    calendarApi.changeView(value);
+  }, [calendarView, getCalendarApi]);
+
+  useEffect(() => {
+    let calendarApi = getCalendarApi();
+    if(calendarApi === undefined) { return; }
+
+    setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
+  }, [getCalendarApi, setTitle]);
+
+  return (
+    <div className='calendar'>
+      <div className='calendar-main'>
+        <FullCalendar
+          ref={calendarRef as React.LegacyRef<FullCalendar>}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
+          headerToolbar={false}
+          initialView='dayGridMonth'
+          editable={true}
+          selectable={true}
+          selectMirror={true}
+          dayMaxEvents={true}
+          longPressDelay={20}
+          //initialEvents={INITIAL_EVENTS} // alternatively, use the `events` setting to fetch from a feed
+          select={handleDateSelect}
+          eventContent={renderEventContent} // custom render function
+          eventClick={handleEventClick}
+          //eventsSet={this.handleEvents} // called after events are initialized/added/changed/removed
+          eventAdd={handleEventAdd}
+          unselectAuto={false}
+          contentHeight={900}
+          /* you can update a remote database when these fire:
+          eventChange={function(){}}
+          eventRemove={function(){}}
+          */
+        />
+        <EventMenu
+          info={eventMenuInfo}
+          onClickAway={closeEventMenu}
+        />
+        <EventClick
+          eventClick={eventClickInfo}
+          onClickAway={() => {setEventClickInfo({ clickInfo: null, openMenu: false })}}
+        />
       </div>
-    )
-  }
-
-  closeEventMenu = () => {
-    if(this.state.eventMenuInfo.openMenu) {
-      this.setState({
-        eventMenuInfo: {
-          openMenu: false,
-          selectInfo: null
-        }
-      })
-    }
-  }
-
-  handleEventAdd = () => {
-    this.closeEventMenu();
-  }
-
-  handleDateSelect = (selectInfo: DateSelectArg) => {
-    this.setState({
-      eventMenuInfo: {
-        openMenu: true,
-        selectInfo: selectInfo
-      }
-    })
-  }
-
-  handleEventClick = (clickInfo: EventClickArg) => {
-    this.setState({
-      eventClickInfo: {
-        openMenu: true,
-        clickInfo: clickInfo
-      }
-    })
-  }
-
-  componentDidMount() {
-    let calendarRef = this.calendarRef;
-    let calendarApi = calendarRef?.current?.getApi();
-    if(calendarApi === undefined) { return; }
-
-    this.props.setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
-  }
-
-  componentDidUpdate(prevProps: CalendarProps) {
-    let calendarRef = this.calendarRef;
-    let calendarApi = calendarRef?.current?.getApi();
-    if(calendarApi === undefined) { return; }
-
-    if(this.props.nextCalled !== prevProps.nextCalled) {
-      calendarApi.next();
-      this.props.setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
-    } else if(this.props.prevCalled !== prevProps.prevCalled) {
-      calendarApi.prev();
-      this.props.setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
-    } else if(this.props.todayCalled !== prevProps.todayCalled) {
-      calendarApi.today();
-      this.props.setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
-    } else if(this.props.calendarView !== prevProps.calendarView) {
-      let value = this.viewMap.get(this.props.calendarView) ?? '';
-      calendarApi.changeView(value);
-    }
-  }
+    </div>
+  )
 }
 
 
