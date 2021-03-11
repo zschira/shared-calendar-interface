@@ -42,7 +42,7 @@ export default function Calendar(props: CalendarProps) {
     if(eventMenuInfo.openMenu) {
       setEventMenuInfo({
         openMenu: false,
-        selectInfo: null
+        selectInfo: eventMenuInfo.selectInfo
       });
     }
   }
