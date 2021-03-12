@@ -35,6 +35,7 @@ export interface EventClickInfo {
 export interface EventClickProps {
   eventClick: EventClickInfo,
   onClickAway: () => void,
+  onEdit: (clickInfo: EventClickArg) => void,
 }
 
 export default function EventClick(props: EventClickProps) {
@@ -78,10 +79,14 @@ export default function EventClick(props: EventClickProps) {
         <IconButton aria-label="share">
           <ShareIcon />
         </IconButton>
-        <IconButton aria-label="edit">
+        <IconButton
+          aria-label="edit"
+          onClick={() => {if(clickInfo !== null) {props.onEdit(clickInfo);}}}>
           <EditIcon />
         </IconButton>
-        <IconButton aria-label="delete" onClick={() => {clickInfo?.event?.remove(); props.onClickAway();}}>
+        <IconButton
+          aria-label="delete"
+          onClick={() => {clickInfo?.event?.remove(); props.onClickAway();}}>
           <DeleteIcon />
         </IconButton>
         <Button className={classes.close} onClick={() => {props.onClickAway()}}>

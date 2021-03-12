@@ -65,6 +65,18 @@ export default function Calendar(props: CalendarProps) {
     });
   }
 
+  const handleEventEdit = (clickInfo: EventClickArg) => {
+    setEventClickInfo({
+      openMenu: false,
+      clickInfo: clickInfo
+    });
+
+    setEventMenuInfo({
+      openMenu: true,
+      selectInfo: clickInfo
+    });
+  }
+
   const getCalendarApi = useCallback(() => {
     let calendarRefTmp = calendarRef;
     return calendarRefTmp?.current?.getApi();
@@ -147,7 +159,8 @@ export default function Calendar(props: CalendarProps) {
         />
         <EventClick
           eventClick={eventClickInfo}
-          onClickAway={() => {setEventClickInfo({ clickInfo: null, openMenu: false })}}
+          onClickAway={() => {setEventClickInfo({ clickInfo: eventClickInfo.clickInfo, openMenu: false })}}
+          onEdit={handleEventEdit}
         />
       </div>
     </div>

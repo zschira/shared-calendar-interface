@@ -5,13 +5,13 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
 import { createEventId } from './event-utils'
-import { DateSelectArg, CalendarApi } from '@fullcalendar/react'
+import { DateSelectArg, CalendarApi, EventClickArg } from '@fullcalendar/react'
 import { getDateStr, getTimeStr, getWeekAndDayStr, getWeekDayRule, getWeekOfMonth } from './date-utils'
 import './event-menu.css'
 
 export interface EventMenuInfo {
   openMenu: boolean,
-  selectInfo: DateSelectArg | null
+  selectInfo: DateSelectArg | null | EventClickArg
 }
 
 export interface EventMenuProps {
@@ -39,19 +39,18 @@ export default function EventMenu(props: EventMenuProps) {
   const [recurrence, setRecurrence] = useState('never');
   const [horizontal, setHorizontal] = useState(200);
   const [vertical, setVertical] = useState(200);
+  const [dateChanged, setDateChanged] = useState(0);
 
   useEffect(() => {
-    setStartDate(props.info.selectInfo?.start ?? new Date());
-    setEndDate(props.info.selectInfo?.end ?? new Date());
-    setAllDay(props.info.selectInfo?.allDay ?? false);
-    setHorizontal(props.info.selectInfo?.jsEvent?.clientX ?? 200);
-    setVertical(props.info.selectInfo?.jsEvent?.clientY ?? 200);
-  }, [props.info.selectInfo]);
-
-  useEffect(() => {
-    setTitle('');
-    setDescription('');
-    setRecurrence('');
+    if(props.info.selectInfo === null) { return; }
+    let event: Event = getEventInfo(props.info.selectInfo);
+    setStartDate(event.start);
+    setEndDate(event.end);
+    setAllDay(event.allDay);
+    setHorizontal(event.horizontal);
+    setVertical(event.vertical);
+    setTitle(event.title);
+    setDescription(event.description);
   }, [props.info.selectInfo]);
 
   const handleEventMenuChanged = (event: ChangeEvent) => {
@@ -72,10 +71,12 @@ export default function EventMenu(props: EventMenuProps) {
     }
   }
 
-  const handleEventCreate = (selectInfo: DateSelectArg | null) => {
+  const handleEventCreate = (selectInfo: DateSelectArg | null | EventClickArg) => {
     if(selectInfo === null) {
       return;
     }
+
+    if(!isDateSelect(selectInfo)) { editEvent(selectInfo); }
 
     let calendarApi = selectInfo.view.calendar;
 
@@ -86,6 +87,28 @@ export default function EventMenu(props: EventMenuProps) {
     }
 
     calendarApi.unselect();
+  }
+
+  const editEvent = (info: EventClickArg) => {
+    if(info.event.title !== title) {
+      info.event.setProp('title', title);
+    }
+
+    if(info.event.extendedProps.description !== description) {
+      info.event.setExtendedProp('description', description);
+    }
+
+    if(info.event.start !== startDate) {
+      info.event.setStart(startDate);
+    }
+
+    if(info.event.end !== endDate) {
+      info.event.setEnd(endDate);
+    }
+
+    if(info.event.allDay !== allDay) {
+      info.event.setAllDay(allDay);
+    }
   }
 
   const createNormalEvent = (calendarApi: CalendarApi) => {
@@ -133,6 +156,7 @@ export default function EventMenu(props: EventMenuProps) {
     date.setDate(parseInt(value[2]));
 
     name === 'startDate' ? setStartDate(date) : setEndDate(date);
+    setDateChanged(dateChanged + 1);
   }
 
   const handleTimeChanged = (event: ChangeEvent) => {
@@ -145,8 +169,15 @@ export default function EventMenu(props: EventMenuProps) {
     date.setMinutes(parseInt(value[1]));
 
     name === 'startDate' ? setStartDate(date) : setEndDate(date);
+    setDateChanged(dateChanged + 1);
   }
-  
+
+  let startStr = getDateStr(startDate);
+  let startTime = getTimeStr(startDate);
+
+  let endStr = getDateStr(endDate);
+  let endTime = getTimeStr(endDate);
+
   return(
     <Popover
       id="event-creation"
@@ -198,7 +229,7 @@ export default function EventMenu(props: EventMenuProps) {
             name="startDate"
             label="Start Date"
             type="date"
-            value={getDateStr(startDate)}
+            value={startStr}
             onChange={handleDateChanged}
           />
         </Grid>
@@ -207,7 +238,7 @@ export default function EventMenu(props: EventMenuProps) {
             name="startDate"
             label="Start Time"
             type="time"
-            value={getTimeStr(startDate)}
+            value={startTime}
             onChange={handleTimeChanged}
           />
         </Grid>
@@ -217,7 +248,7 @@ export default function EventMenu(props: EventMenuProps) {
             name="endDate"
             label="End Date"
             type="date"
-            value={getDateStr(endDate)}
+            value={endStr}
             onChange={handleDateChanged}
           />
         </Grid>
@@ -228,7 +259,7 @@ export default function EventMenu(props: EventMenuProps) {
             name="endDate"
             label="End Time"
             type="time"
-            value={getTimeStr(endDate)}
+            value={endTime}
             onChange={handleTimeChanged}
           />
         </Grid>
@@ -269,4 +300,42 @@ export default function EventMenu(props: EventMenuProps) {
     </Paper>
     </Popover>
   )
+}
+
+interface Event {
+  title: string,
+  description: string,
+  start: Date,
+  end: Date,
+  allDay: boolean,
+  horizontal: number,
+  vertical: number,
+}
+
+function getEventInfo(info: DateSelectArg | EventClickArg) {
+  if(isDateSelect(info)) {
+    return {
+      title: '',
+      description: '',
+      start: info.start ?? new Date(),
+      end: info.end ?? new Date(),
+      allDay: info.allDay,
+      horizontal: info.jsEvent?.clientX ?? 200,
+      vertical: info.jsEvent?.clientY ?? 200,
+    };
+  } else {
+    return {
+      title: info.event.title,
+      description: info.event.extendedProps.description,
+      start: info.event.start ?? new Date(),
+      end: info.event.end ?? new Date(),
+      allDay: info.event.allDay,
+      horizontal: info.jsEvent?.clientX ?? 200,
+      vertical: info.jsEvent?.clientY ?? 200,
+    };
+  }
+}
+
+function isDateSelect(info: DateSelectArg | EventClickArg): info is DateSelectArg {
+  return (info as DateSelectArg).start !== undefined;
 }
