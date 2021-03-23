@@ -21,6 +21,7 @@ import PeopleIcon from '@material-ui/icons/People';
 import Select from '@material-ui/core/Select';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import Calendar from './calendar';
+import ResourceSearch from './resources'
 
 const drawerWidth = 240;
 
@@ -96,6 +97,15 @@ const useStyles = makeStyles((theme: Theme) =>
       }),
       marginLeft: 0,
     },
+    resource: {
+      width: '50%',
+      margin: '0 auto',
+      marginTop: 50,
+    },
+    scroll: {
+      display: 'flex',
+      flexDirection: 'column',
+    }
   }),
 );
 
@@ -167,6 +177,18 @@ export default function BaseApplication() {
         </>
       );
     } else if(view === "resourceManagement") {
+      return(
+        <>
+          <Typography variant="h6" className={classes.title}>
+            Mutual Aid Hub
+          </Typography>
+          <div>
+            <IconButton color="inherit" edge="end" >
+              <AccountCircleIcon fontSize="large"/>
+            </IconButton>
+          </div>
+        </>
+      );
     }
   }
 
@@ -224,7 +246,7 @@ export default function BaseApplication() {
         })}
       >
       {view === "calendar" &&
-        <Calendar 
+        <Calendar
           prevCalled={prev}
           nextCalled={next}
           todayCalled={today}
@@ -233,7 +255,9 @@ export default function BaseApplication() {
           drawerOpen={open}
         />
       }
-      {view === "resourceManagement" && <div />}
+      {view === "resourceManagement" && 
+        <ResourceSearch />
+      }
       </main>
     </div>
   );

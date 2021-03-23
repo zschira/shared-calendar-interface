@@ -51,6 +51,7 @@ export default function EventMenu(props: EventMenuProps) {
     setVertical(event.vertical);
     setTitle(event.title);
     setDescription(event.description);
+    setRecurrence('never');
   }, [props.info.selectInfo]);
 
   const handleEventMenuChanged = (event: ChangeEvent) => {
@@ -76,7 +77,7 @@ export default function EventMenu(props: EventMenuProps) {
       return;
     }
 
-    if(!isDateSelect(selectInfo)) { editEvent(selectInfo); }
+    if(!isDateSelect(selectInfo)) { return editEvent(selectInfo); }
 
     let calendarApi = selectInfo.view.calendar;
 
@@ -119,7 +120,7 @@ export default function EventMenu(props: EventMenuProps) {
         description: description,
       },
       start: startDate.toISOString(),
-      end: endDate.toISOString(),
+      end: allDay ? undefined : endDate.toISOString(),
       allDay: allDay
     });
   }

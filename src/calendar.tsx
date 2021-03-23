@@ -51,6 +51,10 @@ export default function Calendar(props: CalendarProps) {
     closeEventMenu();
   }
 
+  const handleEventChange = () => {
+    closeEventMenu();
+  }
+
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     setEventMenuInfo({
       openMenu: true,
@@ -146,8 +150,10 @@ export default function Calendar(props: CalendarProps) {
           eventClick={handleEventClick}
           //eventsSet={this.handleEvents} // called after events are initialized/added/changed/removed
           eventAdd={handleEventAdd}
+          eventChange={handleEventChange}
           unselectAuto={false}
-          contentHeight={900}
+          aspectRatio={2.0}
+          //contentHeight={900}
           /* you can update a remote database when these fire:
           eventChange={function(){}}
           eventRemove={function(){}}
