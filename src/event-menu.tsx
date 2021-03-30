@@ -114,7 +114,7 @@ export default function EventMenu(props: EventMenuProps) {
 
   const createNormalEvent = (calendarApi: CalendarApi) => {
     calendarApi.addEvent({
-      id: createEventId(),
+      id: createEventId(title, description, startDate, endDate, recurrence),
       title: title,
       extendedProps: {
         description: description,
@@ -132,7 +132,7 @@ export default function EventMenu(props: EventMenuProps) {
     }
 
     calendarApi.addEvent({
-      id: createEventId(),
+      id: createEventId(title, description, startDate, endDate, recurrence),
       title: title,
       extendedProps: {
         description: description,
