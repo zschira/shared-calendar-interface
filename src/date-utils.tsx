@@ -1,4 +1,4 @@
-import { RRule } from 'rrule'
+import { rrulestr, RRule, Weekday } from 'rrule'
 
 const zeroPad = (num: number, places: number) => String(num).padStart(places, '0');
 
@@ -52,7 +52,36 @@ export function getWeekDayRule(day: number, week: number) {
   }
 }
 
+export function getRecurrence(recurrence: string) {
+  switch(recurrence) {
+    case 'monthly':
+      return RRule.MONTHLY;
+    case 'weekly':
+      return RRule.WEEKLY;
+    case 'daily':
+      return RRule.DAILY;
+  }
+}
+
 export function getFormattedDateStr(date: Date | undefined | null) {
   let options: Intl.DateTimeFormatOptions = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
   return date?.toLocaleString(undefined, options) ?? '';
+}
+
+export function getFilteredRecurrenceRule(rrule: string, startStr: string | undefined, endStr: string | undefined) {
+  let rule = rrulestr(rrule);
+  let options = rule.options;
+
+  let wd = options.bynweekday ? options.bynweekday[0] : null;
+
+  console.log('1)');
+
+  let startDate = startStr ? rule.after(new Date(startStr)) : options.dtstart;
+
+  return new RRule({
+    freq: options.freq,
+    dtstart: startDate,
+    byweekday: wd ? new Weekday(wd[0], wd[1]) : null,
+    until: endStr ? new Date(endStr) : undefined
+  }).toString();
 }

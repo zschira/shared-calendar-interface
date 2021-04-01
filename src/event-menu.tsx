@@ -4,9 +4,15 @@ import { Popover, Paper, Select, MenuItem, TextField, Button } from '@material-u
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
+import { RRule } from 'rrule';
 import { createEventId } from './event-utils'
 import { DateSelectArg, CalendarApi, EventClickArg } from '@fullcalendar/react'
-import { getDateStr, getTimeStr, getWeekAndDayStr, getWeekDayRule, getWeekOfMonth } from './date-utils'
+import { getDateStr,
+        getTimeStr,
+        getWeekAndDayStr,
+        getWeekDayRule,
+        getWeekOfMonth,
+        getRecurrence } from './date-utils'
 import './event-menu.css'
 
 export interface EventMenuInfo {
@@ -131,17 +137,21 @@ export default function EventMenu(props: EventMenuProps) {
       byWeekDay = getWeekDayRule(startDate.getDay(), getWeekOfMonth(startDate, true));
     }
 
+    let rrule = new RRule({
+        freq: getRecurrence(recurrence),
+        dtstart: startDate,
+        byweekday: byWeekDay
+      }).toString();
+
     calendarApi.addEvent({
       id: createEventId(title, description, startDate, endDate, recurrence),
       title: title,
       extendedProps: {
         description: description,
+        rrule: rrule,
+        duration: endDate.getTime() - startDate.getTime(),
       },
-      rrule: {
-        freq: recurrence,
-        dtstart: startDate.toISOString(),
-        byweekday: byWeekDay
-      },
+      rrule: rrule,
       duration: endDate.getTime() - startDate.getTime()
     });
   }

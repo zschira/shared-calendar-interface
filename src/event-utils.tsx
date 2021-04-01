@@ -11,5 +11,5 @@ export function createEventId(title: string,
   shasum.update(startStr.toISOString());
   shasum.update(endStr.toISOString());
   shasum.update(recurrence);
-  return String(shasum.digest())
+  return String(shasum.digest("hex"))
 }

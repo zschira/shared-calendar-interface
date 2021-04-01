@@ -4,13 +4,20 @@ import { ApolloClient, InMemoryCache } from '@apollo/client';
 import { ApolloProvider } from '@apollo/client';
 
 import BaseApplication from './App';
+import { createSchemaLink } from './resolvers'
+
+//import useScript from './hooks'
 
 const client = new ApolloClient({
-  uri: 'https://48p1r2roz4.sse.codesandbox.io',
+  link: createSchemaLink(),
   cache: new InMemoryCache()
 });
 
+
 function App() {
+  //useScript('https://unpkg.com/ipfs@0.35.0/dist/index.min.js');
+  //useScript('https://www.unpkg.com/orbit-db@0.25.3/dist/orbitdb.min.js');
+
   return (
     <ApolloProvider client={client}>
       <BaseApplication />

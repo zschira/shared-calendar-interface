@@ -20,7 +20,7 @@ import TodayIcon from '@material-ui/icons/Today';
 import PeopleIcon from '@material-ui/icons/People';
 import Select from '@material-ui/core/Select';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import Calendar from './calendar';
+import CalendarView from './calendar_view';
 import ResourceSearch from './resources'
 
 const drawerWidth = 240;
@@ -83,7 +83,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     content: {
       flexGrow: 1,
-      padding: theme.spacing(3),
+      padding: theme.spacing(1),
       transition: theme.transitions.create('margin', {
         easing: theme.transitions.easing.sharp,
         duration: 0,
@@ -246,13 +246,14 @@ export default function BaseApplication() {
         })}
       >
       {view === "calendar" &&
-        <Calendar
+        <CalendarView
           prevCalled={prev}
           nextCalled={next}
           todayCalled={today}
           setTitle={setTitle}
           calendarView={calendarView}
           drawerOpen={open}
+          filters={{startStr: undefined, endStr: undefined, tags: []}}
         />
       }
       {view === "resourceManagement" && 

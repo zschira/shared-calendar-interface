@@ -12,7 +12,9 @@ import ShareIcon from '@material-ui/icons/Share';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+
 import { getFormattedDateStr } from './date-utils';
+import FilterBar from './filters';
 
 const useStyles = makeStyles((theme: Theme) => 
   createStyles({
@@ -33,7 +35,7 @@ const useStyles = makeStyles((theme: Theme) =>
       marginRight: 50,
     },
     searchResults: {
-      flexGrow: 3,
+      flexGrow: 8,
     },
     resource: {
       marginBottom: 20,
@@ -57,7 +59,13 @@ export default function ResourceSearch() {
 
   return(
     <div className={classes.resourceContainer}>
-      <div className={classes.sidebar} />
+      <FilterBar 
+        tags={['Clothing', 'Toiletries', 'Shelter']}
+        setRangeStartStr={(str) => {}}
+        setRangeEndStr={(str) => {}}
+        rangeStartStr={''}
+        rangeEndStr={''}
+      />
       <div className={classes.searchResults}>
         <Resource 
           title={'test'}
