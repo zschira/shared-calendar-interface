@@ -1,5 +1,11 @@
 import React from 'react';
 import clsx from 'clsx';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
 import { makeStyles, useTheme, Theme, createStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -113,7 +119,6 @@ export default function BaseApplication() {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
-  const [view, setView] = React.useState("calendar");
   const [prev, setPrev] = React.useState(0);
   const [next, setNext] = React.useState(0);
   const [today, setToday] = React.useState(0);
@@ -128,16 +133,11 @@ export default function BaseApplication() {
     setOpen(false);
   };
 
-  const handleViewSelect = (name: string) => {
-    setView(name);
-    setOpen(false);
-  }
-
   const handleCalendarViewSelect = (event: React.ChangeEvent<{ value: unknown }>) => {
     setCalendarView(event.target.value as string);
   }
 
-  const getAppBarContent = () => {
+  const getAppBarContent = (view: string) => {
     if(view === "calendar") {
       return(
         <>
@@ -176,7 +176,7 @@ export default function BaseApplication() {
           </div>
         </>
       );
-    } else if(view === "resourceManagement") {
+    } else if(view === "resources") {
       return(
         <>
           <Typography variant="h6" className={classes.title}>
@@ -193,6 +193,7 @@ export default function BaseApplication() {
   }
 
   return (
+    <Router>
     <div className={classes.root}>
       <CssBaseline />
       <AppBar
@@ -211,7 +212,14 @@ export default function BaseApplication() {
           >
             <MenuIcon />
           </IconButton>
-          {getAppBarContent()}
+          <Switch>
+            <Route path="/resources">
+              {getAppBarContent("resources")}
+            </Route>
+            <Route path="/">
+              {getAppBarContent("calendar")}
+            </Route>
+          </Switch>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -230,11 +238,11 @@ export default function BaseApplication() {
         </div>
         <Divider />
         <List>
-          <ListItem button onClick={() => { handleViewSelect("calendar") }}>
+          <ListItem button onClick={handleDrawerClose} component={Link} to={"/"}>
             <ListItemIcon> <TodayIcon /> </ListItemIcon>
             <ListItemText primary="Calendar" />
           </ListItem>
-          <ListItem button onClick={() => { handleViewSelect("resourceManagement") }}>
+          <ListItem button onClick={handleDrawerClose} component={Link} to={"/resources"}>
             <ListItemIcon> <PeopleIcon /> </ListItemIcon>
             <ListItemText primary="Resource Management" />
           </ListItem>
@@ -245,20 +253,23 @@ export default function BaseApplication() {
           [classes.contentShift]: open,
         })}
       >
-      {view === "calendar" &&
-        <CalendarView
-          prevCalled={prev}
-          nextCalled={next}
-          todayCalled={today}
-          setTitle={setTitle}
-          calendarView={calendarView}
-          drawerOpen={open}
-        />
-      }
-      {view === "resourceManagement" && 
-        <ResourceSearch />
-      }
+      <Switch>
+        <Route path="/resources">
+          <ResourceSearch />
+        </Route>
+        <Route path="/">
+          <CalendarView
+            prevCalled={prev}
+            nextCalled={next}
+            todayCalled={today}
+            setTitle={setTitle}
+            calendarView={calendarView}
+            drawerOpen={open}
+          />
+        </Route>
+      </Switch>
       </main>
     </div>
+    </Router>
   );
 }
