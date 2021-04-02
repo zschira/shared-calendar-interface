@@ -1,8 +1,17 @@
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { useState } from 'react'
 
-import Calendar, { CalendarProps } from './calendar'
+import Calendar from './calendar'
 import FilterBar from './filters'
+
+interface CalendarViewProps {
+  prevCalled: number,
+  nextCalled: number,
+  todayCalled: number,
+  setTitle: (arg0: string) => void,
+  calendarView: string,
+  drawerOpen: boolean,
+}
 
 const useStyles = makeStyles((theme: Theme) => 
   createStyles({
@@ -17,7 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export default function CalendarView(props: CalendarProps) {
+export default function CalendarView(props: CalendarViewProps) {
   const classes = useStyles();
 
   const [rangeStartStr, setRangeStartStr] = useState('');

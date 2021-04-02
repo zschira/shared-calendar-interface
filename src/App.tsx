@@ -253,7 +253,6 @@ export default function BaseApplication() {
           setTitle={setTitle}
           calendarView={calendarView}
           drawerOpen={open}
-          filters={{startStr: undefined, endStr: undefined, tags: []}}
         />
       }
       {view === "resourceManagement" && 

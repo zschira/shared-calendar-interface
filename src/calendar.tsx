@@ -5,6 +5,8 @@ import FullCalendar from '@fullcalendar/react'
 import { DateSelectArg, EventClickArg, EventContentArg, formatDate } from '@fullcalendar/react'
 import { EventAddArg } from '@fullcalendar/react'
 import { EventRemoveArg } from '@fullcalendar/react'
+import { EventInput } from '@fullcalendar/react'
+import { DatesSetArg } from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import rrulePlugin from '@fullcalendar/rrule'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -23,7 +25,7 @@ interface FilterParameters {
   tags: string[];
 }
 
-export interface CalendarProps {
+interface CalendarProps {
   prevCalled: number,
   nextCalled: number,
   todayCalled: number,
@@ -71,6 +73,8 @@ export default function Calendar(props: CalendarProps) {
     openMenu: false,
     clickInfo: null
   });
+
+  const [eventArray, setEventArray] = useState<EventInput[]>([]);
 
   const [addEvent] = useMutation<
     {addEvent: string},
@@ -156,6 +160,12 @@ export default function Calendar(props: CalendarProps) {
     });
   }
 
+  const handleDateChange = ({ view }: DatesSetArg) => {
+    let calendarApi = view.calendar;
+
+    setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}));
+  }
+
   const getCalendarApi = useCallback(() => {
     let calendarRefTmp = calendarRef;
     return calendarRefTmp?.current?.getApi();
@@ -166,24 +176,21 @@ export default function Calendar(props: CalendarProps) {
     if(calendarApi === undefined) { return; }
 
     calendarApi.next();
-    setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
-  }, [nextCalled, getCalendarApi, setTitle]);
+  }, [nextCalled, getCalendarApi]);
 
   useEffect(() => {
     let calendarApi = getCalendarApi();
     if(calendarApi === undefined) { return; }
 
     calendarApi.prev();
-    setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
-  }, [prevCalled, getCalendarApi, setTitle]);
+  }, [prevCalled, getCalendarApi]);
 
   useEffect(() => {
     let calendarApi = getCalendarApi();
     if(calendarApi === undefined) { return; }
 
     calendarApi.today();
-    setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
-  }, [todayCalled, getCalendarApi, setTitle]);
+  }, [todayCalled, getCalendarApi]);
 
   useEffect(() => {
     let calendarApi = getCalendarApi();
@@ -200,39 +207,30 @@ export default function Calendar(props: CalendarProps) {
   }, [calendarView, getCalendarApi]);
 
   useEffect(() => {
-    let calendarApi = getCalendarApi();
-    if(calendarApi === undefined) { return; }
+    setEventArray(data ? data.events.map(event => {
+      let rrule = event.rrule ? getFilteredRecurrenceRule(
+        event.rrule,
+        props.filters.startStr,
+        props.filters.endStr
+      ) : undefined;
 
-    setTitle(formatDate(calendarApi.getDate(), {month: 'long', year: 'numeric'}))
-  }, [getCalendarApi, setTitle]);
+      return  {
+        id: event._id,
+        title: event.title,
+        extendedProps: {
+          description: event.description
+        },
+        start: new Date(event.startStr),
+        end: event.endStr ? new Date(event.endStr) : undefined,
+        rrule: rrule,
+        duration: event.duration,
+        allDay: event.allDay
+      }
+    }) : []);
+  }, [data, setEventArray, props.filters]);
 
   if (loading) return (<h2 className='message'>Loading...</h2>)
   if (error) return (<h2 className='message'>Error!</h2>)
-
-  let eventArray = data ? data.events.map(event => {
-    let rrule = event.rrule ? getFilteredRecurrenceRule(
-      event.rrule,
-      props.filters.startStr,
-      props.filters.endStr) : undefined;
-
-    if(rrule) { 
-      console.log('2)');
-      console.log(event.rrule); 
-    }
-
-    return  {
-      id: event._id,
-      title: event.title,
-      extendedProps: {
-        description: event.description
-      },
-      start: new Date(event.startStr),
-      end: event.endStr ? new Date(event.endStr) : undefined,
-      rrule: rrule,
-      duration: event.duration,
-      allDay: event.allDay
-    }
-  }) : [];
 
   return (
     <div className='calendar'>
@@ -246,7 +244,7 @@ export default function Calendar(props: CalendarProps) {
         selectMirror={true}
         dayMaxEvents={true}
         longPressDelay={20}
-        initialEvents={eventArray} // alternatively, use the `events` setting to fetch from a feed
+        events={eventArray} // alternatively, use the `events` setting to fetch from a feed
         select={handleDateSelect}
         eventContent={renderEventContent} // custom render function
         eventClick={handleEventClick}
@@ -257,6 +255,7 @@ export default function Calendar(props: CalendarProps) {
         unselectAuto={false}
         aspectRatio={1.71}
         fixedWeekCount={false}
+        datesSet={handleDateChange}
         //contentHeight={900}
       />
       <EventMenu
