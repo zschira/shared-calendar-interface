@@ -106,7 +106,7 @@ export default function Calendar(props: CalendarProps) {
   const handleEventAdd = (addInfo: EventAddArg) => {
     let event = addInfo.event;
     addEvent({ variables: {
-        location: "Washington, D.C.", 
+        location: "Washington, D.C.",
         newEvent: {
           _id: event.id,
           title: event.title,
