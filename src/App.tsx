@@ -5,7 +5,7 @@ import {
   Switch,
   Route,
   Link
-} from "react-router-dom";
+} from 'react-router-dom';
 import { makeStyles, useTheme, Theme, createStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -27,7 +27,8 @@ import PeopleIcon from '@material-ui/icons/People';
 import Select from '@material-ui/core/Select';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import CalendarView from './calendar_view';
-import ResourceSearch from './resources'
+import ResourceSearch from './resources';
+import ResourceForm from './add-resources';
 
 const drawerWidth = 240;
 
@@ -256,6 +257,9 @@ export default function BaseApplication() {
       <Switch>
         <Route path="/resources">
           <ResourceSearch />
+        </Route>
+          <Route path="/attachments/:eventId">
+          <ResourceForm />
         </Route>
         <Route path="/">
           <CalendarView

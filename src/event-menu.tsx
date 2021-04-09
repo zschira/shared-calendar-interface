@@ -5,7 +5,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
 import { RRule } from 'rrule';
-import { createEventId } from './event-utils'
+import { createHashId } from './event-utils'
 import { DateSelectArg, CalendarApi, EventClickArg } from '@fullcalendar/react'
 import { getDateStr,
         getTimeStr,
@@ -110,6 +110,8 @@ export default function EventMenu(props: EventMenuProps) {
     }
 
     if(info.event.end !== endDate) {
+      console.log(info.event.end);
+      console.log(endDate);
       info.event.setEnd(endDate);
     }
 
@@ -120,7 +122,7 @@ export default function EventMenu(props: EventMenuProps) {
 
   const createNormalEvent = (calendarApi: CalendarApi) => {
     calendarApi.addEvent({
-      id: createEventId(title, description, startDate, endDate, recurrence),
+      id: createHashId([title, description, startDate, endDate, recurrence]),
       title: title,
       extendedProps: {
         description: description,
@@ -144,7 +146,7 @@ export default function EventMenu(props: EventMenuProps) {
       }).toString();
 
     calendarApi.addEvent({
-      id: createEventId(title, description, startDate, endDate, recurrence),
+      id: createHashId([title, description, startDate, endDate, recurrence]),
       title: title,
       extendedProps: {
         description: description,

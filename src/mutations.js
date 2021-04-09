@@ -15,3 +15,11 @@ export const REMOVE_EVENT = gql`
     }
   }
 `;
+
+export const ADD_RESOURCE = gql`
+  mutation AddResource($location: String!, $newResource: ResourceInput!) {
+    addResource(location: $location, newResource: $newResource) {
+      _id
+    }
+  }
+`;

@@ -15,6 +15,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { getFormattedDateStr } from './date-utils';
 import { EventClickArg } from '@fullcalendar/react'
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles((theme: Theme) => 
   createStyles({
@@ -76,7 +77,10 @@ export default function EventClick(props: EventClickProps) {
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
-        <IconButton aria-label="share">
+        <IconButton
+          aria-label="share"
+          component={Link} to={`/attachments/${clickInfo?.event?.id}`}
+        >
           <AttachmentIcon />
         </IconButton>
         <IconButton

@@ -16,6 +16,16 @@ const typeDefs = gql`
     rrule: String
     duration: Int
     allDay: Boolean!
+    resources: [Resource]!
+  }
+
+  type Resource {
+    _id: ID!
+    title: String!
+    description: String!
+    providing: Boolean!
+    tags: [String]!
+    event: Event
   }
 
   input EventInput {
@@ -29,6 +39,15 @@ const typeDefs = gql`
     allDay: Boolean!
   }
 
+  input ResourceInput {
+    _id: ID!
+    title: String!
+    description: String!
+    providing: Boolean!
+    tags: [String]!
+    event: ID
+  }
+
   input FilterParameters {
     startStr: String
     endStr: String
@@ -37,28 +56,25 @@ const typeDefs = gql`
 
   type Query {
     events(location: String!, filters: FilterParameters!): [Event]!
+    event(location: String!, id: ID!): Event
+    resources(location: String!, filters: FilterParameters!): [Resource]!
+    resource(location: String!, id: ID!): Resource
   }
 
   type Mutation {
     addEvent(location: String!, newEvent: EventInput!): ID!
     removeEvent(location: String!, id: ID!): ID!
+    addResource(location: String!, newResource: ResourceInput!): ID!
   }
 `;
 
 /*
     author: Author!
-    resources: [Resources]!
+    resources: [Resource]!
     resources(location: String!): [Resource]
     event(id: ID!): Event
     resource(id: ID!): Resource
     author(id: ID!): Author
-  type Resource {
-    id: ID!
-    title: String!
-    description: String!
-    author: Author!
-    event: Event
-  }
 
   type Author {
     id: ID!
@@ -83,6 +99,10 @@ const resolvers = {
 
     removeEvent: (parent, args, {orbitHandler}, info) => {
       return orbitHandler.removeEvent('places/' + args.location, args.id);
+    },
+
+    addResource: (parent, args, {orbitHandler}, info) => {
+      return orbitHandler.addResource('places/' + args.location, args.newResource);
     }
   }
 };

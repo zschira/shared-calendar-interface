@@ -1,23 +1,23 @@
-import React from 'react'
+import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
-import FullCalendar from '@fullcalendar/react'
-import { DateSelectArg, EventClickArg, EventContentArg, formatDate } from '@fullcalendar/react'
-import { EventAddArg } from '@fullcalendar/react'
-import { EventRemoveArg } from '@fullcalendar/react'
-import { EventInput } from '@fullcalendar/react'
-import { DatesSetArg } from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import rrulePlugin from '@fullcalendar/rrule'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
+import FullCalendar from '@fullcalendar/react';
+import { DateSelectArg, EventClickArg, EventContentArg, formatDate } from '@fullcalendar/react';
+import { EventAddArg } from '@fullcalendar/react';
+import { EventRemoveArg } from '@fullcalendar/react';
+import { EventInput } from '@fullcalendar/react';
+import { DatesSetArg } from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import rrulePlugin from '@fullcalendar/rrule';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 
-import EventMenu, { EventMenuInfo } from './event-menu'
-import EventClick, { EventClickInfo } from './event-click'
-import { getFilteredRecurrenceRule } from './date-utils'
-import './calendar.css'
-import { ADD_EVENT, REMOVE_EVENT } from './mutations'
-import { GET_EVENTS } from './queries'
+import EventMenu, { EventMenuInfo } from './event-menu';
+import EventClick, { EventClickInfo } from './event-click';
+import { getFilteredRecurrenceRule } from './date-utils';
+import './calendar.css';
+import { ADD_EVENT, REMOVE_EVENT } from './mutations';
+import { GET_EVENTS } from './queries';
 
 interface FilterParameters {
   startStr: string | undefined;

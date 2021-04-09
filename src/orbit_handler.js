@@ -9,7 +9,8 @@ export default class OrbitHandler {
     //this._init.bind(this);
     //this.addEvent.bind(this);
 
-    this.openDB = {};
+    this.eventsDB = {};
+    this.resourcesDB = {};
     this.initialized = false;
   }
 
@@ -29,34 +30,59 @@ export default class OrbitHandler {
                      .endDate(filters.endStr)
                      .create();
 
-    return this.openDB[loc].query(filter);
+    return this.eventsDB[loc].query(filter);
   }
 
   async addEvent(loc, newEvent) {
     await this._loadDB(loc);
 
-    return await this.openDB[loc].put(newEvent);
+    return await this.eventsDB[loc].put(newEvent);
   }
 
   async removeEvent(loc, id) {
     await this._loadDB(loc);
 
-    return await this.openDB[loc].del(id);
+    return await this.eventsDB[loc].del(id);
   }
 
-  async _loadDB(loc) {
+  async addResource(loc, newResource) {
+    await this._loadDB(loc, true);
+
+    return await this.resourcesDB[loc].put(newResource);
+  }
+
+  async _loadDB(loc, resource=false) {
     if(!this.initialized) {
       await this._init();
       this.initialized= true;
     }
 
-    if(this.openDB[loc] === undefined) {
+    let dbMap = resource ? this.resourcesDB : this.eventsDB;
+
+    if(dbMap[loc] === undefined) {
       let dbAddress = this.places.get(loc);
-      let dbLoad = dbAddress ? this.OrbitDB.parseAddress(dbAddress) : loc;
-      let locDB = await this.orbitdb.docstore(dbLoad);
-      this.places.put(loc, locDB.address.toString());
-      await locDB.load();
-      this.openDB[loc] = locDB;
+      let events, resources;
+      if(undefined) {
+        events = this.OrbitDB.parseAddress(dbAddress['events']);
+        resources = this.OrbitDB.parseAddress(dbAddress['resources']);
+      } else {
+        events = loc + '/events';
+        resources = loc + '/resources';
+      }
+
+      let eventDB = await this.orbitdb.docstore(events);
+      let resourceDB = await this.orbitdb.docstore(resources);
+
+      this.places.put(loc, {
+        events: eventDB.address.toString(),
+        resources: resourceDB.address.toString()
+      });
+
+      await eventDB.load();
+      await resourceDB.load();
+
+      this.eventsDB[loc] = eventDB;
+      this.resourcesDB[loc] = resourceDB;
     }
   }
 }

@@ -1,15 +1,7 @@
 import crypto from 'crypto'
 
-export function createEventId(title: string, 
-                              description: string, 
-                              startStr: Date, 
-                              endStr: Date, 
-                              recurrence: string) {
+export function createHashId(vals: any[]) {
   let shasum = crypto.createHash('sha1');
-  shasum.update(title);
-  shasum.update(description);
-  shasum.update(startStr.toISOString());
-  shasum.update(endStr.toISOString());
-  shasum.update(recurrence);
+  vals.forEach((val) => { shasum.update(val) });
   return String(shasum.digest("hex"))
 }
