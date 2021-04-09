@@ -122,13 +122,6 @@ export default function ResourceForm() {
     });
   }
 
-        /*
-  const handleFormChanged = (event: ChangeEvent) => {
-    const value = (event.target as HTMLInputElement).value;
-
-    setTags(value.split(',').map((tag) => tag.trim()));
-  }*/
-
   return(
     <div className={classes.root}>
       <Paper className={classes.form}>
