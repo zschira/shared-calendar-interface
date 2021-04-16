@@ -26,9 +26,8 @@ import TodayIcon from '@material-ui/icons/Today';
 import PeopleIcon from '@material-ui/icons/People';
 import Select from '@material-ui/core/Select';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import CalendarView from './calendar_view';
-import ResourceSearch from './resources';
-import ResourceForm from './add-resources';
+
+import Content from './content';
 
 const drawerWidth = 240;
 
@@ -254,24 +253,14 @@ export default function BaseApplication() {
           [classes.contentShift]: open,
         })}
       >
-      <Switch>
-        <Route path="/resources">
-          <ResourceSearch />
-        </Route>
-          <Route path="/attachments/:eventId">
-          <ResourceForm />
-        </Route>
-        <Route path="/">
-          <CalendarView
-            prevCalled={prev}
-            nextCalled={next}
-            todayCalled={today}
-            setTitle={setTitle}
-            calendarView={calendarView}
-            drawerOpen={open}
-          />
-        </Route>
-      </Switch>
+        <Content
+          prevCalled={prev}
+          nextCalled={next}
+          todayCalled={today}
+          setTitle={setTitle}
+          calendarView={calendarView}
+          drawerOpen={open}
+        />
       </main>
     </div>
     </Router>

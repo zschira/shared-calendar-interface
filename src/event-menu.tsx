@@ -110,8 +110,6 @@ export default function EventMenu(props: EventMenuProps) {
     }
 
     if(info.event.end !== endDate) {
-      console.log(info.event.end);
-      console.log(endDate);
       info.event.setEnd(endDate);
     }
 

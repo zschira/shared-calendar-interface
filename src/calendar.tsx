@@ -1,11 +1,11 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import FullCalendar from '@fullcalendar/react';
 import { DateSelectArg, EventClickArg, EventContentArg, formatDate } from '@fullcalendar/react';
 import { EventAddArg } from '@fullcalendar/react';
-import { EventRemoveArg } from '@fullcalendar/react';
 import { EventInput } from '@fullcalendar/react';
+import { EventRemoveArg } from '@fullcalendar/react';
 import { DatesSetArg } from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import rrulePlugin from '@fullcalendar/rrule';
@@ -17,13 +17,6 @@ import EventClick, { EventClickInfo } from './event-click';
 import { getFilteredRecurrenceRule } from './date-utils';
 import './calendar.css';
 import { ADD_EVENT, REMOVE_EVENT } from './mutations';
-import { GET_EVENTS } from './queries';
-
-interface FilterParameters {
-  startStr: string | undefined;
-  endStr: string | undefined;
-  tags: string[];
-}
 
 interface CalendarProps {
   prevCalled: number,
@@ -32,10 +25,10 @@ interface CalendarProps {
   setTitle: (arg0: string) => void,
   calendarView: string,
   drawerOpen: boolean,
-  filters: FilterParameters,
+  eventArray: EventInput[],
 }
 
-interface Event {
+export interface Event {
   _id: string,
   title: string,
   description: string,
@@ -44,15 +37,10 @@ interface Event {
   rrule: string | undefined,
   duration: number | undefined,
   allDay: boolean,
-}
-
-interface EventList {
-  events: Event[];
-}
-
-interface GetEventVars {
-  location: string;
-  filters: FilterParameters;
+  resources: {
+    _id: string,
+    tags: string[]
+  } | undefined
 }
 
 export default function Calendar(props: CalendarProps) {
@@ -74,8 +62,6 @@ export default function Calendar(props: CalendarProps) {
     clickInfo: null
   });
 
-  const [eventArray, setEventArray] = useState<EventInput[]>([]);
-
   const [addEvent] = useMutation<
     {addEvent: string},
     {location: string, newEvent: Event}
@@ -86,14 +72,6 @@ export default function Calendar(props: CalendarProps) {
     {location: string, id: string}
   >(REMOVE_EVENT);
   
-  const { loading, data, error } = useQuery<
-    EventList,
-    GetEventVars
-  >(GET_EVENTS, { variables: { 
-    location: 'Washington, D.C.',
-    filters: props.filters
-  }});
-
   const closeEventMenu = () => {
     if(eventMenuInfo.openMenu) {
       setEventMenuInfo({
@@ -116,6 +94,7 @@ export default function Calendar(props: CalendarProps) {
           rrule: event.extendedProps.rrule,
           duration: event.extendedProps.duration,
           allDay: event.allDay,
+          resources: undefined
         }
       }
     });
@@ -206,31 +185,6 @@ export default function Calendar(props: CalendarProps) {
     calendarApi.changeView(value);
   }, [calendarView, getCalendarApi]);
 
-  useEffect(() => {
-    setEventArray(data ? data.events.map(event => {
-      let rrule = event.rrule ? getFilteredRecurrenceRule(
-        event.rrule,
-        props.filters.startStr,
-        props.filters.endStr
-      ) : undefined;
-
-      return  {
-        id: event._id,
-        title: event.title,
-        extendedProps: {
-          description: event.description
-        },
-        start: new Date(event.startStr),
-        end: event.endStr ? new Date(event.endStr) : undefined,
-        rrule: rrule,
-        duration: event.duration,
-        allDay: event.allDay
-      }
-    }) : []);
-  }, [data, setEventArray, props.filters]);
-
-  if (loading) return (<h2 className='message'>Loading...</h2>)
-  if (error) return (<h2 className='message'>Error!</h2>)
 
   return (
     <div className='calendar'>
@@ -244,7 +198,7 @@ export default function Calendar(props: CalendarProps) {
         selectMirror={true}
         dayMaxEvents={true}
         longPressDelay={20}
-        events={eventArray} // alternatively, use the `events` setting to fetch from a feed
+        events={props.eventArray} // alternatively, use the `events` setting to fetch from a feed
         select={handleDateSelect}
         eventContent={renderEventContent} // custom render function
         eventClick={handleEventClick}

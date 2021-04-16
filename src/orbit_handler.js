@@ -1,4 +1,4 @@
-import Filter from './filter'
+import { Filter, Event } from './db-utils'
 
 export default class OrbitHandler {
   constructor(Ipfs, OrbitDB) {
@@ -25,12 +25,22 @@ export default class OrbitHandler {
   async getEvents(loc, filters) {
     await this._loadDB(loc);
 
+    const getResources = id => this.getResourcesByEvent(loc, id);
+
     let filter = new Filter()
                      .startDate(filters.startStr)
                      .endDate(filters.endStr)
+                     .tags(filters.tags)
                      .create();
 
-    return this.eventsDB[loc].query(filter);
+    return this.eventsDB[loc].get('').reduce((events, eventDoc) => {
+      let event = new Event(eventDoc, getResources);
+      if(filter(event)) {
+        events.push(event.schemaView());
+      }
+
+      return events;
+    }, []);
   }
 
   async addEvent(loc, newEvent) {
@@ -51,6 +61,16 @@ export default class OrbitHandler {
     return await this.resourcesDB[loc].put(newResource);
   }
 
+  async getResources(loc, filters) {
+    await this._loadDB(loc, true);
+
+    return this.resourcesDB[loc].get('');
+  }
+
+  getResourcesByEvent(loc, id) {
+    return this.resourcesDB[loc].query((resource) => resource.event === id);
+  }
+
   async _loadDB(loc, resource=false) {
     if(!this.initialized) {
       await this._init();
@@ -62,7 +82,7 @@ export default class OrbitHandler {
     if(dbMap[loc] === undefined) {
       let dbAddress = this.places.get(loc);
       let events, resources;
-      if(undefined) {
+      if(dbAddress !== undefined) {
         events = this.OrbitDB.parseAddress(dbAddress['events']);
         resources = this.OrbitDB.parseAddress(dbAddress['resources']);
       } else {

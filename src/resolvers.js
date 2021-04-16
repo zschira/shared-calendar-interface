@@ -37,6 +37,7 @@ const typeDefs = gql`
     rrule: String
     duration: Int
     allDay: Boolean!
+    resources: [ID]
   }
 
   input ResourceInput {
@@ -44,7 +45,7 @@ const typeDefs = gql`
     title: String!
     description: String!
     providing: Boolean!
-    tags: [String]!
+    tags: String!
     event: ID
   }
 
@@ -89,6 +90,10 @@ const resolvers = {
   Query: {
     events: (parent, args, {orbitHandler}, info) => {
       return orbitHandler.getEvents('places/' + args.location, args.filters);
+    },
+
+    resources: (parent, args, {orbitHandler}, info) => {
+      return orbitHandler.getResources('places/' + args.location, args.filters);
     }
   },
 

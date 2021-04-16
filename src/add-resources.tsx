@@ -66,7 +66,7 @@ interface Resource {
   title: string,
   description: string,
   providing: boolean,
-  tags: string[],
+  tags: string,
   event: string
 }
 
@@ -106,16 +106,17 @@ export default function ResourceForm() {
   }
 
   const handleAdd = () => {
-    let tagArray = tags.split(',').map((tag) => tag.trim());
+//    let tagArray = tags.split(',').map((tag) => tag.trim());
+    console.log(tags);
 
     addResource({ variables: {
         location: "Washington, D.C.",
         newResource: {
-          _id: createHashId([title, description, resourceType].concat(tagArray)),
+          _id: createHashId([title, description, resourceType, tags, eventId]),
           title: title,
           description: description,
           providing: resourceType === 'providing',
-          tags: tagArray,
+          tags: tags,
           event: eventId,
         }
       }

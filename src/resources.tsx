@@ -1,4 +1,6 @@
 import React from 'react'
+import { useState } from 'react'
+import { useQuery } from '@apollo/client';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
@@ -15,6 +17,7 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 
 import { getFormattedDateStr } from './date-utils';
 import FilterBar from './filters';
+import { GET_RESOURCE } from './queries';
 
 const useStyles = makeStyles((theme: Theme) => 
   createStyles({
@@ -43,66 +46,30 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export interface ResourceProps {
+interface ResourceProps {
   title: string,
   description: string,
   date: Date
 }
 
-/*
-export interface ResourceSearchProps {
+export interface ResourcesProps {
+  resourceID: string[]
 }
-*/
 
-export default function ResourceSearch() {
-  const classes = useStyles();
-
+export default function Resources(props: ResourcesProps) {
   return(
-    <div className={classes.resourceContainer}>
-      <FilterBar 
-        tags={['Clothing', 'Toiletries', 'Shelter']}
-        setRangeStartStr={(str) => {}}
-        setRangeEndStr={(str) => {}}
-        rangeStartStr={''}
-        rangeEndStr={''}
-      />
-      <div className={classes.searchResults}>
-        <Resource 
-          title={'test'}
-          description={'description'}
-          date={new Date()}
+          <div />
+            /*
+      props.resourceID.map((id) => {
+        <Resource
+          
         />
-        <Resource 
-          title={'test'}
-          description={'description'}
-          date={new Date()}
-        />
-        <Resource 
-          title={'test'}
-          description={'description'}
-          date={new Date()}
-        />
-        <Resource 
-          title={'test'}
-          description={'description'}
-          date={new Date()}
-        />
-        <Resource 
-          title={'test'}
-          description={'description'}
-          date={new Date()}
-        />
-        <Resource 
-          title={'test'}
-          description={'description'}
-          date={new Date()}
-        />
-      </div>
-    </div>
+      });
+             */
   );
 }
 
-export function Resource(props: ResourceProps) {
+function Resource(props: ResourceProps) {
   const classes = useStyles();
 
   return(

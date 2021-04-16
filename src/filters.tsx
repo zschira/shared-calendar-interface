@@ -35,48 +35,27 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export interface FilterProps {
-  tags: string[],
+  tags: Map<string, boolean>,
+  setQueryTags: (arg0: string) => void,
   setRangeStartStr: (arg0: string) => void,
   setRangeEndStr: (arg0: string) => void,
   rangeStartStr: string,
   rangeEndStr: string,
 }
 
-interface TagChecks {
-  [key: string]: boolean
-};
-
 type ChangeEvent = React.ChangeEvent<{ name?: string | undefined; value: unknown; }>;
 
 export default function FilterBar(props: FilterProps) {
   const classes = useStyles();
 
-  const [tagChecks, setTagChecks] = useState<TagChecks>({});
-  const [updateCounter, setUpdateCounter] = useState(0);
-
-  useEffect(() => {
-    setTagChecks({});
-    props.tags.forEach((tag) => {
-      setTagChecks((tags) => {
-        tags[tag] = false;
-        return tags;
-      });
-    });
-  }, [props.tags]);
-
   const handleChange = (tag: string) => {
-    setTagChecks((tags) => {
-      tags[tag] = !tags[tag];
-      return tags;
-    });
-
-    setUpdateCounter(updateCounter + 1);
+    props.setQueryTags(tag);
   }
 
-  const tagCheckBoxes = props.tags.map((tag: string) =>
+  const tagCheckBoxes = Array.from(props.tags.keys()).map((tag: string) =>
       <FormControlLabel
         control={<Checkbox 
-                  checked={tagChecks[tag] || false} 
+                  checked={props.tags.get(tag)} 
                   onChange={() => handleChange(tag)} 
                   name={tag} />}
         label={tag}
