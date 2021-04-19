@@ -49,6 +49,9 @@ const useStyles = makeStyles((theme: Theme) =>
     calendar: {
       flexGrow: 15,
     },
+    message: {
+      marginTop: 60
+    }
   })
 );
 
@@ -60,7 +63,7 @@ export default function Content(props: ContentProps) {
   const [eventArray, setEventArray] = useState<EventInput[]>([]);
   const [tagMap, setTagMap] = useState<Map<string, boolean>>(new Map());
   const [tags, setTags] = useState<string[]>([]);
-  const [updateCounter, setUpdateCounter] = useState(0);
+  const [, setUpdateCounter] = useState(0);
 
   const { loading, data, error } = useQuery<
     EventList,
@@ -112,9 +115,17 @@ export default function Content(props: ContentProps) {
   const setQueryTagsChecked = (tag: string) => {
     setTagMap(tagMap => tagMap.set(tag, !tagMap.get(tag)));
     setTags(tags => {
-      return tags.includes(tag) ? tags.filter(val => val != tag) : tags.concat(tag);
+      return tags.includes(tag) ? tags.filter(val => val !== tag) : tags.concat(tag);
     });
   }
+
+  if(loading) return (
+    <h2 className={classes.message}>Loading...</h2>
+  );
+
+  if(error) return (
+    <h2 className={classes.message}>{error.message}</h2>
+  );
 
   return(
     <Switch>

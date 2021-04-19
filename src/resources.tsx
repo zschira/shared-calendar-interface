@@ -1,6 +1,4 @@
 import React from 'react'
-import { useState } from 'react'
-import { useQuery } from '@apollo/client';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
@@ -16,8 +14,6 @@ import EditIcon from '@material-ui/icons/Edit';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 
 import { getFormattedDateStr } from './date-utils';
-import FilterBar from './filters';
-import { GET_RESOURCE } from './queries';
 
 const useStyles = makeStyles((theme: Theme) => 
   createStyles({

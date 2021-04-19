@@ -14,7 +14,6 @@ import interactionPlugin from '@fullcalendar/interaction';
 
 import EventMenu, { EventMenuInfo } from './event-menu';
 import EventClick, { EventClickInfo } from './event-click';
-import { getFilteredRecurrenceRule } from './date-utils';
 import './calendar.css';
 import { ADD_EVENT, REMOVE_EVENT } from './mutations';
 
