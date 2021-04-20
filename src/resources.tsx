@@ -13,28 +13,10 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 
-import { getFormattedDateStr } from './date-utils';
-
 const useStyles = makeStyles((theme: Theme) => 
   createStyles({
-    root: {
-      flexGrow: 345,
-    },
     close: {
       marginLeft: 'auto'
-    },
-    resourceContainer: {
-      display: 'flex',
-      flexDirection: 'row',
-      marginTop: 60,
-    },
-    sidebar: {
-      backgroundColor: 'blue',
-      flexGrow: 1,
-      marginRight: 50,
-    },
-    searchResults: {
-      flexGrow: 8,
     },
     resource: {
       marginBottom: 20,
@@ -42,30 +24,35 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-interface ResourceProps {
+export interface Resource {
+  _id: string,
   title: string,
   description: string,
-  date: Date
+  tags: string[]
 }
 
 export interface ResourcesProps {
-  resourceID: string[]
+  resources: Resource[]
 }
 
 export default function Resources(props: ResourcesProps) {
+  let resourceArray = props.resources.map((resource) => {
+    return (
+      <ResourceResult
+        {...resource}
+        key={resource._id}
+      />
+    )
+  });
+
   return(
-          <div />
-            /*
-      props.resourceID.map((id) => {
-        <Resource
-          
-        />
-      });
-             */
+    <div>
+    {resourceArray}
+    </div>
   );
 }
 
-function Resource(props: ResourceProps) {
+function ResourceResult(props: Resource) {
   const classes = useStyles();
 
   return(
@@ -82,7 +69,6 @@ function Resource(props: ResourceProps) {
           </IconButton>
         }
         title={props.title}
-        subheader={getFormattedDateStr(props.date)}
       />
       <CardContent>
         <Typography variant="body2" color="textSecondary" component="p">

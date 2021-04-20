@@ -13,6 +13,8 @@ export const GET_EVENTS = gql`
       allDay
       resources {
         _id
+        title
+        description
         tags
       }
     }

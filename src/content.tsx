@@ -5,7 +5,7 @@ import { EventInput } from '@fullcalendar/react';
 import { Switch, Route } from 'react-router-dom';
 
 import Calendar, { Event } from './calendar'
-import Resources from './resources'
+import Resources, { Resource } from './resources'
 import FilterBar from './filters'
 import { GET_EVENTS } from './queries';
 import ResourceForm from './add-resources';
@@ -35,10 +35,6 @@ interface QueryVars {
   filters: FilterParameters;
 }
 
-interface ResourceRef {
-  tags: string[]
-}
-
 const useStyles = makeStyles((theme: Theme) => 
   createStyles({
     resourceContainer: {
@@ -61,11 +57,12 @@ export default function Content(props: ContentProps) {
   const [rangeStartStr, setRangeStartStr] = useState('');
   const [rangeEndStr, setRangeEndStr] = useState('');
   const [eventArray, setEventArray] = useState<EventInput[]>([]);
+  const [resourceArray, setResourceArray] = useState<Resource[]>([]);
   const [tagMap, setTagMap] = useState<Map<string, boolean>>(new Map());
   const [tags, setTags] = useState<string[]>([]);
   const [, setUpdateCounter] = useState(0);
 
-  const { loading, data, error } = useQuery<
+  const { loading, data, error, refetch } = useQuery<
     EventList,
     QueryVars
   >(GET_EVENTS, { variables: { 
@@ -102,15 +99,18 @@ export default function Content(props: ContentProps) {
   }, [data, setEventArray, rangeStartStr, rangeEndStr]);
 
   useEffect(() => {
+    setResourceArray([]);
     eventArray.forEach((event) => {
-      event.extendedProps?.resources?.forEach((resource: ResourceRef) => {
+      event.extendedProps?.resources?.forEach((resource: Resource) => {
         resource.tags.forEach(tag => {
           setTagMap(tagMap => tagMap.set(tag, tagMap.get(tag) ?? false));
         });
+
+        setResourceArray(resourceArray => resourceArray.concat(resource));
       });
     });
     setUpdateCounter(updateCounter => updateCounter + 1);
-  }, [eventArray, setTagMap, setUpdateCounter]);
+  }, [eventArray, setTagMap, setUpdateCounter, setResourceArray]);
 
   const setQueryTagsChecked = (tag: string) => {
     setTagMap(tagMap => tagMap.set(tag, !tagMap.get(tag)));
@@ -145,9 +145,11 @@ export default function Content(props: ContentProps) {
 
           <Switch>
             <Route path="/resources">
-              <Resources
-                resourceID={[]}
-              />
+              <div className={classes.calendar}>
+                <Resources
+                  resources={resourceArray}
+                />
+              </div>
             </Route>
             <Route path="/">
               <div className={classes.calendar}>
